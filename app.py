@@ -5,13 +5,15 @@ from services.leads import save_lead
 from services.formatter import format_response
 from services.logger import log_message
 from services.analytics import track_event, get_stats
+from flask_cors import CORS
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/stats", methods=["GET"])
 def stats():
     return get_stats()
-
+    
 
 @app.route("/chat", methods=["POST"])
 def chat():
