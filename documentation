@@ -1,0 +1,16 @@
+# Create a virtual environment
+python3 -m venv .venv
+
+# Activate the virtual environment (Linux/macOS)
+source .venv/bin/activate
+
+# Install Flask
+pip install flask
+
+pip install -U "google-genai"
+
+#google sheet access 
+pip install gspread oauth2client
+
+enable Drives api 
+enable Sheets api
