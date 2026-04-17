@@ -18,6 +18,9 @@ pip install gspread oauth2client
 enable Drives api 
 enable Sheets api
 
+//all installations we need
+pip install flask gunicorn google-genai gspread oauth2client flask-cors
+
 
 render start command  
 gunicorn app:app
