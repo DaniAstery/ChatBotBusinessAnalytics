@@ -21,3 +21,6 @@ enable Sheets api
 
 render start command  
 gunicorn app:app
+
+//for requirements for deploying
+ pip freeze > requirements.txt
