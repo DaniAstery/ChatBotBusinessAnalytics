@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-user_sessions = {}
+session= {};
 @app.route("/stats", methods=["GET"])
 def stats():
     return get_stats()
@@ -33,37 +33,41 @@ def chat():
         return jsonify(format_response(reply, "sales"))
     
 
-    # 🧑‍💼 LEAD
     if route == "lead":
 
-        name = user.get("name")
-        contact = user.get("phone") or user.get("email")
+    # initialize session if needed
+        if session["waiting_for_lead"] is False:
+            session["waiting_for_lead"] = True
+            session["data"] = {}
 
-        # ✅ If user info already exists → SAVE
-        if name and contact:
-            save_lead(user)
+            return jsonify(format_response(
+                "Great! What is your name?",
+                "lead"
+            ))
 
-            reply = "Thanks! Our team will contact you soon."
-            log_message(user, message, "lead")
-            track_event("lead")
+        # step 1 → collect name
+        if "name" not in session["data"]:
+            session["data"]["name"] = message
 
-            return jsonify(format_response(reply, "lead"))
+            return jsonify(format_response(
+                "Please provide your phone number or email.",
+                "lead"
+            ))
 
-        # ❗ If info missing → ASK for it
-        else:
-            missing = []
+        # step 2 → collect contact + SAVE
+        if "contact" not in session["data"]:
+            session["data"]["phone"] = message
+            save_lead(session["data"])  
+            # reset session
+            session["waiting_for_lead"] = False
+            session["data"] = {}
 
-            if not name:
-                missing.append("name")
-
-            if not contact:
-                missing.append("phone number or email")
-
-            ask_text = "Please provide your " + " and ".join(missing) + " so we can assist you."
-
-            return jsonify(format_response(ask_text, "lead"))
-        
-       
+            return jsonify(format_response(
+                "Thanks! Our team will contact you soon.",
+                "lead"
+            ))
+    
+    
     # 🛠️ SUPPORT
     if route == "support":
         reply = "I understand your issue. Please explain more."
