@@ -9,58 +9,40 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-user_sessions= {};
+
+user_sessions = {}
+
 @app.route("/stats", methods=["GET"])
 def stats():
     return get_stats()
-    
+
 
 @app.route("/chat", methods=["POST"])
 def chat():
 
+    # 1️⃣ Request data
     data = request.json
-    message = data.get("message")
+    message = data.get("message", "")
     user = data.get("user", {})
 
-     # 2️⃣ session id
+    # 2️⃣ Session setup
     session_id = data.get("session_id", "default")
 
-    # 3️⃣ create session if not exists
     if session_id not in user_sessions:
         user_sessions[session_id] = {}
 
-    # 4️⃣ NOW define session ✅
     session = user_sessions[session_id]
 
-    # 5️⃣ NOW safe to use setdefault ✅
+    # ✅ Safe init
     session.setdefault("waiting_for_lead", False)
     session.setdefault("data", {})
 
+    # =====================================
+    # 🔥 1. HANDLE ACTIVE LEAD FLOW FIRST
+    # =====================================
+    if session["waiting_for_lead"]:
 
-    route = route_message(message)
-
-    # 💰 SALES
-    if route == "sales":
-        
-        reply = "Great! What product are you interested in?"
-        log_message(user, message, "sales")
-        track_event("sales")
-        return jsonify(format_response(reply, "sales"))
-    
-
-       if route == "lead":
-
-        # 🔹 START FLOW
-        if session["waiting_for_lead"] is False:
-            session["waiting_for_lead"] = True
-            session["data"] = {}
-
-            return jsonify(format_response(
-                "Great! What is your name?",
-                "lead"
-            ))
-
-        # 🔹 STEP 1: NAME
+        # STEP 1 → NAME
         if "name" not in session["data"]:
             session["data"]["name"] = message
 
@@ -69,11 +51,11 @@ def chat():
                 "lead"
             ))
 
-        # 🔹 STEP 2: CONTACT + SAVE
+        # STEP 2 → CONTACT + SAVE
         if "contact" not in session["data"]:
             session["data"]["contact"] = message
 
-            # ✅ FIX: map fields for sheet
+            # map fields for sheet
             session["data"]["phone"] = session["data"]["contact"]
             session["data"]["interest"] = "gemstone"
 
@@ -85,7 +67,7 @@ def chat():
             except Exception as e:
                 print("SAVE ERROR:", e)
 
-            # reset session
+            # reset
             session["waiting_for_lead"] = False
             session["data"] = {}
 
@@ -93,25 +75,43 @@ def chat():
                 "Thanks! Our team will contact you soon.",
                 "lead"
             ))
-    
-    
+
+    # =====================================
+    # 🔥 2. ROUTING (ONLY IF NOT IN FLOW)
+    # =====================================
+    route = route_message(message)
+
+    # 💰 SALES
+    if route == "sales":
+        reply = "Great! What product are you interested in?"
+        log_message(user, message, "sales")
+        track_event("sales")
+        return jsonify(format_response(reply, "sales"))
+
+    # 🧑‍💼 LEAD → START FLOW
+    if route == "lead":
+        session["waiting_for_lead"] = True
+        session["data"] = {}
+
+        return jsonify(format_response(
+            "Great! What is your name?",
+            "lead"
+        ))
+
     # 🛠️ SUPPORT
     if route == "support":
         reply = "I understand your issue. Please explain more."
         log_message(user, message, "support")
-        track_event("support")      
+        track_event("support")
         return jsonify(format_response(reply, "support"))
-       
+
     # 🤖 AI
     ai_reply = ask_gemini(message)
     log_message(user, message, "ai")
     track_event("ai")
+
     return jsonify(format_response(ai_reply, "ai"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-
-
-
-    
