@@ -22,15 +22,20 @@ def chat():
     message = data.get("message")
     user = data.get("user", {})
 
+     # 2️⃣ session id
     session_id = data.get("session_id", "default")
 
+    # 3️⃣ create session if not exists
     if session_id not in user_sessions:
         user_sessions[session_id] = {}
-        session = user_sessions[session_id]
 
-    # ✅ ADD THESE 2 LINES HERE
+    # 4️⃣ NOW define session ✅
+    session = user_sessions[session_id]
+
+    # 5️⃣ NOW safe to use setdefault ✅
     session.setdefault("waiting_for_lead", False)
     session.setdefault("data", {})
+
 
     route = route_message(message)
 
