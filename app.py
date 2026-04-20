@@ -9,7 +9,7 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 CORS(app)
-session= {};
+user_sessions= {};
 @app.route("/stats", methods=["GET"])
 def stats():
     return get_stats()
@@ -21,6 +21,16 @@ def chat():
     data = request.json
     message = data.get("message")
     user = data.get("user", {})
+
+    session_id = data.get("session_id", "default")
+
+    if session_id not in user_sessions:
+        user_sessions[session_id] = {}
+        session = user_sessions[session_id]
+
+    # ✅ ADD THESE 2 LINES HERE
+    session.setdefault("waiting_for_lead", False)
+    session.setdefault("data", {})
 
     route = route_message(message)
 
