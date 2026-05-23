@@ -35,10 +35,28 @@ SYSTEM_PROMPT = """
         Warm, intelligent, professional.
         """
 
-def ask_gemini(message):
+def ask_gemini(message,history=[]):
+
+    conversation = ""
+
+    for item in history:
+        conversation += f"{item['role']}: {item['content']}\n"
+    
+    prompt = f"""
+        {SYSTEM_PROMPT}
+
+        Conversation History:
+        {conversation}
+
+        Customer:
+        {message}
+
+        Assistant:
+        """
+
     response = client.models.generate_content(
         model="gemini-2.5-flash",
-        contents=SYSTEM_PROMPT + "\n\nUser: " + message
+        contents=prompt + "\n\nUser: " + message
     )
 
     return response.text

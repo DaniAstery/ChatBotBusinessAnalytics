@@ -36,6 +36,7 @@ def chat():
     # ✅ Safe init
     session.setdefault("waiting_for_lead", False)
     session.setdefault("data", {})
+    session.setdefault("history", [])
 
     # =====================================
     # 🔥 1. HANDLE ACTIVE LEAD FLOW FIRST
@@ -106,12 +107,14 @@ def chat():
         return jsonify(format_response(reply, "support"))
 
     # 🤖 AI
-    ai_reply = ask_gemini(message)
+    history=session["history"]
+    ai_reply = ask_gemini(message,history)
+    
+    // save history (keep last 10)
+    session["history"].append({"user": message, "assistant": ai_reply})
+    session["history"] = history[-10:]
     log_message(user, message, "ai")
     track_event("ai")
-
-    return jsonify(format_response(ai_reply, "ai"))
-
 
 if __name__ == "__main__":
     app.run(debug=True)
