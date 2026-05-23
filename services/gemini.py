@@ -39,13 +39,14 @@ def ask_gemini(message, history=[]):
 
     conversation = ""
 
+    # safe history parsing
     for item in history:
 
-     role = item.get("role")
-    content = item.get("content")
+        role = item.get("role")
+        content = item.get("content")
 
-    if role and content:
-        conversation += f"{role}: {content}\n"
+        if role and content:
+            conversation += f"{role}: {content}\n"
 
     prompt = f"""
 {SYSTEM_PROMPT}

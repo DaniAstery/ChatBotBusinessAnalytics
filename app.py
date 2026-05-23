@@ -109,15 +109,34 @@ def chat():
 
     # 🤖 AI
 
-    session["history"] = session.get("history", [])
+   # 🤖 AI SECTION
+
+    # temporary reset of old broken sessions
+    session["history"] = []
+
     history = session["history"]
 
     ai_reply = ask_gemini(message, history)
 
-    session["history"].append({"user": message, "assistant": ai_reply})
+    # store user message
+    history.append({
+        "role": "user",
+        "content": message
+    })
+
+    # store assistant reply
+    history.append({
+        "role": "assistant",
+        "content": ai_reply
+    })
+
+    # keep only recent history
     session["history"] = history[-10:]
+
     log_message(user, message, "ai")
+
     track_event("ai")
+
     return jsonify(format_response(ai_reply, "ai"))
 
 if __name__ == "__main__":
