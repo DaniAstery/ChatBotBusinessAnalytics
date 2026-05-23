@@ -115,6 +115,7 @@ def chat():
     session["history"] = history[-10:]
     log_message(user, message, "ai")
     track_event("ai")
+    return jsonify(format_response(ai_reply, "ai"))
 
 if __name__ == "__main__":
     app.run(debug=True)
