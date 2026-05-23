@@ -35,28 +35,39 @@ SYSTEM_PROMPT = """
         Warm, intelligent, professional.
         """
 
-def ask_gemini(message,history=[]):
+def ask_gemini(message, history=[]):
 
     conversation = ""
 
     for item in history:
         conversation += f"{item['role']}: {item['content']}\n"
-    
+
     prompt = f"""
-        {SYSTEM_PROMPT}
+{SYSTEM_PROMPT}
 
-        Conversation History:
-        {conversation}
+Conversation History:
+{conversation}
 
-        Customer:
-        {message}
+Customer:
+{message}
 
-        Assistant:
-        """
+Assistant:
+"""
 
-    response = client.models.generate_content(
-        model="gemini-2.5-flash",
-        contents=prompt + "\n\nUser: " + message
-    )
+    try:
 
-    return response.text
+        response = client.models.generate_content(
+            model="gemini-2.5-flash",
+            contents=prompt
+        )
+
+        if hasattr(response, "text") and response.text:
+            return response.text
+
+        return "Sorry, I could not generate a response."
+
+    except Exception as e:
+
+        print("GEMINI ERROR:", e)
+
+        return "Sorry, the assistant is temporarily unavailable."
