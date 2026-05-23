@@ -109,8 +109,8 @@ def chat():
     # 🤖 AI
     history=session["history"]
     ai_reply = ask_gemini(message,history)
-    
-    // save history (keep last 10)
+
+  
     session["history"].append({"user": message, "assistant": ai_reply})
     session["history"] = history[-10:]
     log_message(user, message, "ai")
