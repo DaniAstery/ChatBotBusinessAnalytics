@@ -40,7 +40,12 @@ def ask_gemini(message, history=[]):
     conversation = ""
 
     for item in history:
-        conversation += f"{item['role']}: {item['content']}\n"
+
+     role = item.get("role")
+    content = item.get("content")
+
+    if role and content:
+        conversation += f"{role}: {content}\n"
 
     prompt = f"""
 {SYSTEM_PROMPT}

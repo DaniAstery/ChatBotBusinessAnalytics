@@ -1,4 +1,5 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, session
+from proto import message
 from services.router import route_message
 from services.gemini import ask_gemini
 from services.leads import save_lead
@@ -107,10 +108,12 @@ def chat():
         return jsonify(format_response(reply, "support"))
 
     # 🤖 AI
-    history=session["history"]
-    ai_reply = ask_gemini(message,history)
 
-  
+    session["history"] = session.get("history", [])
+    history = session["history"]
+
+    ai_reply = ask_gemini(message, history)
+
     session["history"].append({"user": message, "assistant": ai_reply})
     session["history"] = history[-10:]
     log_message(user, message, "ai")
